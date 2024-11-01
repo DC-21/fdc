@@ -1,0 +1,48 @@
+{
+  "name": "krishi_bazaar",
+  "version": "1.0.0",
+  "description": "Our app connects local farmers directly to consumers.",
+  "main": "node_modules/expo/AppEntry.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-dipanshu/krishi-bazaar.git"
+  },
+  "keywords": [
+    "e-commerce"
+  ],
+  "author": "Dipanshu, Tushar, Anshika, Sriya",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/i-dipanshu/krishi-bazaar/issues"
+  },
+  "homepage": "https://github.com/i-dipanshu/krishi-bazaar#readme",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-native-masked-view/masked-view": "^0.3.0",
+    "@react-navigation/native": "^6.1.6",
+    "@react-navigation/stack": "^6.3.16",
+    "axios": "^1.7.7",
+    "expo": "^51.0.0",
+    "expo-status-bar": "~1.12.1",
+    "firebase": "^9.19.1",
+    "react": "18.2.0",
+    "react-native": "^0.74.5",
+    "react-native-dotenv": "^3.4.8",
+    "react-native-gesture-handler": "~2.16.1",
+    "react-native-safe-area-context": "^4.8.2",
+    "react-native-screens": "^3.31.1",
+    "react-native-vector-icons": "^9.2.0",
+    "yarn": "^1.22.19"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.45",
+    "typescript": "~5.3.3"
+  },
+  "private": true
+}
