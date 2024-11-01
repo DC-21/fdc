@@ -3,7 +3,8 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { db } = require("./firebaseAdmin");
-const productRoutes = require("./Routes/productRoutes"); // Import product routes
+const productRoutes = require("./Routes/productRoutes");
+const authRoutes = require("./Routes/auth");
 
 // Middleware
 app.use(express.json());
@@ -30,7 +31,8 @@ app.get("/", (req, res) => {
 });
 
 // Use product routes
-app.use("/products", productRoutes); // Add this line to use product routes
+app.use("/api/auth", authRoutes);
+app.use("/products", productRoutes);
 
 // Server port
 const PORT = 4000;
