@@ -20,8 +20,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Contact from "./src/screens/Contact";
 import Products from "./src/screens/Products";
 import Profile from "./src/screens/Profile";
-import LoginScreen from "./src/screens/Login";
-import RegisterScreen from "./src/screens/Register";
+import LoginScreen from "./src/screens/auth/Login";
+import RegisterScreen from "./src/screens/auth/Register";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -70,8 +70,16 @@ export default function App() {
           component={LoginScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={Home}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Products" component={Products} />
         <Stack.Screen name="ProductDetail" component={ProductDetail} />

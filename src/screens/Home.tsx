@@ -11,12 +11,14 @@ import { Logo } from "../../assets";
 import categoriesData from "../data/categoriesData";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Nav from "../components/Nav";
+import TopBar from "../components/Top";
 
 export default function Home({ navigation }: { navigation: any }) {
   const [search, setSearch] = useState("");
 
   return (
     <View style={styles.container}>
+      <TopBar navigation={navigation} />
       <View style={styles.wrapper}>
         <Text style={styles.subTitle}>Categories</Text>
         <View style={styles.body}>
@@ -42,9 +44,12 @@ export default function Home({ navigation }: { navigation: any }) {
   );
 }
 
-function Categories({ data, navigation }: { data: any, navigation: any }) {
+function Categories({ data, navigation }: { data: any; navigation: any }) {
   return (
-    <TouchableOpacity style={styles.categoryButton} onPress={()=>navigation.navigate("Products")}>
+    <TouchableOpacity
+      style={styles.categoryButton}
+      onPress={() => navigation.navigate("Products")}
+    >
       <Image style={styles.categoryIcon} source={data.image} />
       <Text style={styles.categoryText}>{data.name}</Text>
     </TouchableOpacity>
@@ -76,6 +81,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderColor: "#ccc",
     borderRadius: 50,
+    marginTop: 50,
     // backgroundColor: "#EFEFEF",
   },
   input: {
@@ -90,9 +96,9 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 10,
-    width: '80%',
+    width: "80%",
   },
   logo: {
     width: 30,

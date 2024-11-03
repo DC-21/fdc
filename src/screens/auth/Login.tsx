@@ -8,7 +8,9 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import Loader from "../components/Loader";
+import Loader from "../../components/Loader";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<any>;
@@ -16,17 +18,36 @@ type LoginScreenProps = {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleLogin = async () => {
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      navigation.navigate("Home");
-    } catch (error) {
-      console.error("Navigation Error:", error);
-      Alert.alert("Error", "Failed to navigate to Home.");
+      const response = await axios.post(
+        "http://192.168.43.241:4000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      console.log(response);
+
+      if (response.status === 200) {
+        const userData = response.data.user;
+        // Save user data to AsyncStorage
+        await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        Alert.alert("Success", "Logged in successfully!");
+
+        // Navigate to Home or any other screen
+        navigation.navigate("Home");
+      }
+    } catch (error: any) {
+      console.error("Login Error:", error);
+      console.log(error || error.message);
+
+      Alert.alert("Error", error.response?.data?.message || "Failed to login.");
     } finally {
       setLoading(false);
     }
@@ -47,9 +68,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
           autoCapitalize="none"
         />
         <TouchableOpacity style={styles.button} onPress={handleLogin}>

@@ -8,15 +8,26 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import Loader from "../components/Loader";
+import Loader from "../../components/Loader";
+import axios from "axios";
+
 type RegisterScreenProps = {
   navigation: StackNavigationProp<any>;
 };
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+  const [fullname, setFullname] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false); // Loading state
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const validateFullname = (name: string) => name.trim().length >= 3;
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
+  };
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,6 +40,19 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
+    if (!validateFullname(fullname)) {
+      Alert.alert(
+        "Invalid Fullname",
+        "Fullname must be at least 3 characters."
+      );
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      Alert.alert("Invalid Phone", "Phone number must be 10 digits.");
+      return;
+    }
+
     if (!validateEmail(email)) {
       Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
@@ -44,8 +68,24 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      navigation.navigate("Home");
+      const response = await axios.post(
+        "http://192.168.43.241:4000/api/auth/signup",
+        {
+          fullname,
+          email,
+          password,
+          phone,
+        }
+      );
+
+      console.log(response.data);
+
+      if (response.status === 201) {
+        Alert.alert("Success", "Registration successful.");
+        navigation.navigate("Login");
+      } else {
+        Alert.alert("Error", "Failed to register. Please try again.");
+      }
     } catch (error) {
       console.error("Registration Error:", error);
       Alert.alert("Error", "Failed to register. Please try again.");
@@ -59,6 +99,21 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
       <Loader loading={loading} message="Registering, please wait..." />
       <View style={styles.card}>
         <Text style={styles.title}>Register</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Fullname"
+          value={fullname}
+          onChangeText={setFullname}
+          autoCapitalize="words"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Phone"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+          maxLength={10}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
