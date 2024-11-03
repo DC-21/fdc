@@ -22,18 +22,17 @@ export default function Welcome() {
     borderTopRightRadius: 200 / 2,
   };
 
-  
   const s_title = {
     fontSize: isLogin ? 32 : 24,
     fontWeight: "bold",
     marginBottom: 20,
-  }
+  };
 
   const l_title = {
     fontSize: isLogin ? 24 : 32,
     fontWeight: "bold",
     marginBottom: 20,
-    color: 'white',
+    color: "white",
   };
 
   return (

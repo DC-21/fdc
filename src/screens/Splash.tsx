@@ -2,18 +2,18 @@ import React, { useEffect } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { SplashImg } from "../../assets";
 
-const SplashScreen = ({ navigation }: {navigation: any}) => {
+const SplashScreen = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
     setTimeout(() => {
-      navigation.replace("Home");
+      navigation.replace("Login");
     }, 2000); // change the time as per your requirement
   }, []);
 
   return (
     <View style={styles.container}>
-      <Image style={styles.logo} source={require("../../assets/logo.png")} />
-      <Text style={styles.title}>Krishi Bazaar</Text>
-      <Image style={styles.img} source={SplashImg} />
+      {/* <Image style={styles.logo} source={require("../../assets/logo.png")} /> */}
+      <Text style={styles.title}>Farmers Connect</Text>
+      {/* <Image style={styles.img} source={SplashImg} /> */}
     </View>
   );
 };
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 20,
-    color: '#4e4e4e',
+    color: "#4e4e4e",
   },
   img: {
     position: "absolute",
