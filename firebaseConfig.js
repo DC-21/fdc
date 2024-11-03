@@ -4,11 +4,9 @@ import { getFirestore } from "firebase/firestore"; // if you're using Firestore
 import { getAuth } from "firebase/auth"; // if you're using Firebase Authentication
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBRa9j8lRF057-m345UEoMNL865rq5IUFw",
-  authDomain: "cps30-b5b4b.firebaseapp.com",
-  storageBucket: "cps30-b5b4b.firebasestorage.app",
-
-  project_id: "cps30-b5b4b",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
   storageBucket: "YOUR_STORAGE_BUCKET",
   messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
   appId: "YOUR_APP_ID",
