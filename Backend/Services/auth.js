@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const admin = require("firebase-admin");
 const db = admin.firestore();
 const adminCollection = db.collection("users");
+const { v4: uuidv4 } = require("uuid");
 
 const registerUser = async (req, res) => {
   try {
@@ -15,11 +16,14 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    const userId = uuidv4();
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Save admin to Firestore using an auto-generated ID
     await adminCollection.add({
+      id: userId,
       fullname,
       email,
       password: hashedPassword,
@@ -49,6 +53,7 @@ const loginUser = async (req, res) => {
     const doc = querySnapshot.docs[0];
 
     const user = {
+      id: doc.data().id,
       fullname: doc.data().fullname,
       email: doc.data().email,
       phone: doc.data().phone,
