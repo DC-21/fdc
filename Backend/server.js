@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const morgan = require("morgan");
 const { db } = require("./firebaseAdmin");
 const productRoutes = require("./Routes/productRoutes");
 const authRoutes = require("./Routes/auth");
@@ -11,9 +12,11 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(morgan("dev"));
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
     allowedHeaders: [
       "Access-Control-Allow-Origin",
       "Content-Type",
