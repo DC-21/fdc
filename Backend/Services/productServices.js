@@ -1,26 +1,24 @@
-
 const admin = require("firebase-admin");
 const db = admin.firestore();
 const productCollection = db.collection("products");
 
-
 // Get all products
 async function getAllProducts() {
   const productsSnapshot = await productCollection.get();
-  return productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return productsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 // Create a new product
 async function createProduct(data) {
-    const newProductRef = await productCollection.add(data);
-    const newProduct = await newProductRef.get();
-    return { id: newProduct.id, ...newProduct.data() };
-  }
+  const newProductRef = await productCollection.add(data);
+  const newProduct = await newProductRef.get();
+  return { id: newProduct.id, ...newProduct.data() };
+}
 
 // Get a product by ID
 async function getProductById(id) {
   const productDoc = await productCollection.doc(id).get();
-  if (!productDoc.exists) throw new Error('Product not found');
+  if (!productDoc.exists) throw new Error("Product not found");
   return { id: productDoc.id, ...productDoc.data() };
 }
 
@@ -38,8 +36,10 @@ async function deleteProduct(id) {
 
 // Get products by category
 async function getProductsByCategory(category) {
-  const productsSnapshot = await productCollection.where('category', '==', category).get();
-  return productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const productsSnapshot = await productCollection
+    .where("category", "==", category)
+    .get();
+  return productsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 module.exports = {
@@ -48,5 +48,5 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
-  getProductsByCategory
+  getProductsByCategory,
 };

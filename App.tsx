@@ -22,6 +22,7 @@ import Products from "./src/screens/Products";
 import Profile from "./src/screens/Profile";
 import LoginScreen from "./src/screens/auth/Login";
 import RegisterScreen from "./src/screens/auth/Register";
+import AddProducts from "./src/screens/products/AddProducts";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -86,6 +87,7 @@ export default function App() {
         <Stack.Screen name="Cart" component={Cart} />
         <Stack.Screen name="Payment" component={Payment} />
         <Stack.Screen name="Contact" component={Contact} />
+        <Stack.Screen name="Addproduct" component={AddProducts} />
         {/* <Stack.Screen name="FarmerProfile" component={FarmerProfile} /> */}
       </Stack.Navigator>
       {/* <View style={styles.container}>

@@ -36,7 +36,7 @@ export default function Products({ navigation }: ProductsProps) {
     const fetchProducts = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:4000/products");
-        
+
         const data: Product[] = response.data;
 
         // Map response data to match the Product interface exactly
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     // backgroundColor: "#fff",
     paddingHorizontal: 20,
     paddingTop: 20,
-    width: '100%',
+    width: "100%",
   },
   searchBox: {
     flexDirection: "row",
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingHorizontal: 10,
     borderRadius: 20,
   },
