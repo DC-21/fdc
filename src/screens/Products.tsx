@@ -11,44 +11,26 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import categoriesData from "../data/categoriesData";
-import { Vegetables } from "../../assets";
 import Nav from "../components/Nav";
+import { Product } from "../types/interface";
 
-// Define Product interface for type safety
-interface Product {
-  id: string;
-  productName: string;
-  category: string;
-  price: number;
-}
-
-// Props type for navigation
 interface ProductsProps {
   navigation: any;
 }
 
 export default function Products({ navigation }: ProductsProps) {
-  // State for storing fetched products
   const [products, setProducts] = useState<Product[]>([]);
 
-  // Fetch products from the backend using axios
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:4000/products");
-
-        const data: Product[] = response.data;
-
-        // Map response data to match the Product interface exactly
-        const productsWithImages = data.map((product: Product) => ({
-          id: product.id,
-          productName: product.productName, // Use productName as per Product interface
-          category: product.category || "Uncategorized", // Default category if none is provided
-          price: product.price,
-          image: Vegetables, // Static image for all products
+        const response = await axios.get(
+          "http://192.168.43.241:4000/api/products/"
+        );
+        const data: Product[] = response.data.map((product: Product) => ({
+          ...product,
         }));
-
-        setProducts(productsWithImages); // Set the state with correctly typed data
+        setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -57,7 +39,6 @@ export default function Products({ navigation }: ProductsProps) {
     fetchProducts();
   }, []);
 
-  // Category component for displaying categories
   const Categories = ({ data, navigation }: { data: any; navigation: any }) => (
     <TouchableOpacity style={styles.circleWrapper}>
       <View style={styles.circle}>
@@ -67,16 +48,21 @@ export default function Products({ navigation }: ProductsProps) {
     </TouchableOpacity>
   );
 
-  // Render each product item in the list
-  const renderProductItem = ({ item }: { item: any }) => (
+  const renderProductItem = ({ item }: { item: Product }) => (
     <TouchableOpacity
-      style={styles.productItemContainer}
+      style={styles.productCardContainer}
       onPress={() => navigation.navigate("ProductDetail")}
     >
-      <Image style={styles.productItemImage} source={item.image} />
-      <View style={styles.productItemDetails}>
-        <Text style={styles.productItemName}>{item.productName}</Text>
-        <Text style={styles.productItemPrice}>K{item.price.toFixed(2)}</Text>
+      <Image style={styles.productImage} source={{ uri: item.image1 }} />
+      <View style={styles.productDetails}>
+        <Text style={styles.productCategory}>{item.category}</Text>
+        <Text style={styles.productName}>{item.name}</Text>
+        <View style={styles.priceWrapper}>
+          <Text style={styles.productPrice}>K{item.price.toFixed(2)}</Text>
+          <View style={styles.addButton}>
+            <MaterialIcons name="add" size={20} color="white" />
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -97,6 +83,7 @@ export default function Products({ navigation }: ProductsProps) {
           data={products}
           renderItem={renderProductItem}
           keyExtractor={(item) => item.id}
+          numColumns={2}
           contentContainerStyle={styles.productListContainer}
         />
       </View>
@@ -111,12 +98,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#EFEFEF",
     alignItems: "center",
     justifyContent: "flex-start",
-    // paddingTop: 20,
     height: "100%",
   },
   products: {
     flex: 1,
-    // backgroundColor: "#fff",
     paddingHorizontal: 20,
     paddingTop: 20,
     width: "100%",
@@ -133,7 +118,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: "gray",
-    backfaceVisibility: "visible",
   },
   input: {
     width: "100%",
@@ -175,34 +159,61 @@ const styles = StyleSheet.create({
   },
   textCat: {
     fontSize: 13,
-    // fontWeight: "bold",
-    // marginTop: 10,
   },
   productListContainer: {
     paddingBottom: 20,
   },
-  productItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
+  productCardContainer: {
+    flex: 0.48,
     backgroundColor: "white",
-    paddingHorizontal: 10,
-    borderRadius: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+    marginHorizontal: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  productItemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  productImage: {
+    width: "100%",
+    height: 120,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
-  productItemDetails: {
-    marginLeft: 20,
+  productDetails: {
+    marginTop: 6,
+    paddingHorizontal: 8,
   },
-  productItemName: {
-    fontSize: 18,
+  productCategory: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 1,
+  },
+  productName: {
+    fontSize: 16,
+    marginBottom: 0,
+  },
+  priceWrapper: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 2,
+    marginBottom: 3,
+  },
+  productPrice: {
+    fontSize: 16,
+    color: "green",
     fontWeight: "bold",
   },
-  productItemPrice: {
-    fontSize: 16,
-    marginTop: 5,
+  addButton: {
+    backgroundColor: "green",
+    borderRadius: 12,
+    padding: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

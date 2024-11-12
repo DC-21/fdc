@@ -20,17 +20,6 @@ export default function Home({ navigation }: { navigation: any }) {
     <View style={styles.container}>
       <TopBar navigation={navigation} />
       <View style={styles.wrapper}>
-        <View>
-          <Text style={styles.subTitle}>Categories</Text>
-          <TouchableOpacity>
-            <Text
-              style={styles.buttonText}
-              onPress={() => navigation.navigate("Addproduct")}
-            >
-              Add Product
-            </Text>
-          </TouchableOpacity>
-        </View>
         <View style={styles.body}>
           {categoriesData.map((data) => (
             <Categories key={data.id} data={data} navigation={navigation} />

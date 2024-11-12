@@ -19,6 +19,12 @@ export default function TopBar({ navigation }: { navigation: any }) {
         >
           <MaterialIcons name="notifications" size={24} color={"black"} />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => navigation.navigate("Addproduct")}
+        >
+          <MaterialIcons name="add" size={24} color={"black"} />
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity

@@ -6,11 +6,13 @@ const morgan = require("morgan");
 const { db } = require("./firebaseAdmin");
 const productRoutes = require("./Routes/productRoutes");
 const authRoutes = require("./Routes/auth");
+const uploadImageRouter = require("./upload/index");
 
 // Middleware
-app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
 app.use(morgan("dev"));
 
@@ -35,7 +37,8 @@ app.get("/", (req, res) => {
 
 // Use product routes
 app.use("/api/auth", authRoutes);
-app.use("/products", productRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/uploads", uploadImageRouter);
 
 // Server port
 const PORT = 4000;
