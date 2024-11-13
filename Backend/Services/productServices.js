@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const db = admin.firestore();
 const productCollection = db.collection("products");
+const adminCollection = db.collection("users");
 const { v4: uuidv4 } = require("uuid");
 
 // Create a new product
@@ -73,8 +74,26 @@ const getProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const product = productSnapshot.docs[0].data();
-    res.status(200).json(product);
+    const productData = productSnapshot.docs[0].data();
+
+    console.log("this is data man", productData);
+    const { userId } = productData;
+
+    console.log("this is user id", userId);
+
+    // Fetch user data using userId from the users collection
+    const userSnapshot = await adminCollection.where("id", "==", userId).get();
+
+    const user = userSnapshot.docs[0].data();
+
+    console.log("this is user man", user);
+    // Add user data to the product data
+    const productWithUser = {
+      ...productData,
+      fullname: user.fullname,
+    };
+
+    res.status(200).json(productWithUser);
   } catch (error) {
     console.error("Error fetching product by ID:", error);
     res.status(500).json({ message: "Error fetching product by ID" });
@@ -95,8 +114,28 @@ const getProductsByUserId = async (req, res) => {
         .json({ message: "No products found for this user" });
     }
 
-    const products = snapshot.docs.map((doc) => doc.data());
-    res.status(200).json(products);
+    // Fetch the user details
+    const userSnapshot = await adminCollection.doc(userId).get();
+    if (!userSnapshot.exists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userData = userSnapshot.data();
+
+    // Map the products and include user info in each product
+    const productsWithUser = snapshot.docs.map((doc) => {
+      const productData = doc.data();
+      return {
+        ...productData,
+        seller: {
+          name: userData.fullname,
+          location: userData.location,
+          rating: userData.rating,
+        },
+      };
+    });
+
+    res.status(200).json(productsWithUser);
   } catch (error) {
     console.error("Error fetching products by userId:", error);
     res.status(500).json({ message: "Error fetching products by userId" });

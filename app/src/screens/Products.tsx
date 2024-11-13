@@ -51,7 +51,9 @@ export default function Products({ navigation }: ProductsProps) {
   const renderProductItem = ({ item }: { item: Product }) => (
     <TouchableOpacity
       style={styles.productCardContainer}
-      onPress={() => navigation.navigate("ProductDetail")}
+      onPress={() =>
+        navigation.navigate("ProductDetail", { productId: item.id })
+      }
     >
       <Image style={styles.productImage} source={{ uri: item.image1 }} />
       <View style={styles.productDetails}>

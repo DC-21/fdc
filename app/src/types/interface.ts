@@ -6,13 +6,14 @@ export interface UserData {
 }
 
 export interface Product {
-  id: string;
+  id: string | null;
   name: string;
   description: string;
-  category: string;
+  category: string | null;
   quantity: number;
   price: number;
   userId: string;
   image1: string;
   image2: string;
+  fullname: string | null;
 }
