@@ -4,6 +4,7 @@ import Home from "./components/dashboard/Home";
 import Layout from "./components/Layout";
 import Products from "./components/dashboard/Products";
 import ProductDetails from "./components/dashboard/ProductDetails";
+import Profile from "./components/dashboard/Profile";
 
 function App() {
   return (
@@ -32,6 +33,15 @@ function App() {
         element={
           <Layout>
             <ProductDetails />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <Layout>
+            <Profile />
           </Layout>
         }
       />

@@ -7,6 +7,7 @@ const { db } = require("./firebaseAdmin");
 const productRoutes = require("./Routes/productRoutes");
 const authRoutes = require("./Routes/auth");
 const uploadImageRouter = require("./upload/index");
+const adminRoutes = require("./Routes/admin");
 
 // Middleware
 app.use(bodyParser.json());
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
 
 // Use product routes
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/uploads", uploadImageRouter);
 

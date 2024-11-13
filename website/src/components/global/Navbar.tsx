@@ -1,6 +1,12 @@
 import { Bell, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate("/profile");
+  };
   return (
     <nav className="px-6 py-4 w-full flex justify-between items-center bg-white shadow-md">
       <p className="text-xl font-semibold text-green-600">Farmers Connect</p>
@@ -11,7 +17,7 @@ const Navbar = () => {
             3
           </span>
         </button>
-        <button>
+        <button onClick={handleNavigate}>
           <User className="w-6 h-6 text-gray-600 hover:text-green-500 transition" />
         </button>
         <button className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition">

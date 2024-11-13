@@ -100,7 +100,7 @@ const Products = () => {
       </div>
 
       {/* Product list */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
           <Link to={`/product/${product.id}`} key={product.id}>
             <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col items-center transition-transform transform hover:scale-105">

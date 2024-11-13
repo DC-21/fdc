@@ -1,12 +1,42 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
+import { isAuthenticatedAtom, userDetailsAtom } from "../../recoil/atom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const setUser = useSetRecoilState(userDetailsAtom);
+  const setAuth = useSetRecoilState(isAuthenticatedAtom);
+  const navigate = useNavigate();
 
-  const handleLogin = (e: any) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with:", { email, password });
+    setError(null); // Clear any previous errors
+    setLoading(true); // Start the loader
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/admin/login",
+        { email, password }
+      );
+
+      if (response.data) {
+        console.log("Login successful:", response.data);
+        setUser(response.data.user);
+        setAuth(true);
+
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
+      setError("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,11 +80,15 @@ const Login = () => {
               required
             />
           </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"
-            className="w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            disabled={loading}
+            className={`w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors ${
+              loading && "opacity-50 cursor-not-allowed"
+            }`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
