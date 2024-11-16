@@ -55,12 +55,10 @@ const createOrder = async (req, res) => {
       amount: totalAmount,
       currency: "zmw",
       description: `Payment for order ${orderId}`,
-      customer: {
-        firstname,
-        lastname,
-        email,
-        phoneNumber,
-      },
+      customerFirstName: firstname,
+      customerLastName: lastname,
+      email,
+      phoneNumber,
     };
 
     // Initiate payment
@@ -85,6 +83,7 @@ const createOrder = async (req, res) => {
     if (error instanceof PaymentError) {
       res.status(error.statusCode).json({ message: error.message });
     } else {
+      console.log(error);
       res
         .status(500)
         .json({ message: "Error creating order", error: error.message });
