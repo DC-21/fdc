@@ -6,17 +6,35 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Cart({ navigation }: { navigation: any }) {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+interface CartItem {
+  id: string;
+  name: string;
+  image1: string;
+  price: number;
+  selectedQuantity: number;
+  availableQuantity: number;
+  description: string;
+  fullname: string;
+}
+
+interface CartProps {
+  navigation: any;
+}
+
+export default function Cart({ navigation }: CartProps) {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
         const items = await AsyncStorage.getItem("cart");
+
+        console.log("this is cart man", items);
         if (items) {
           setCartItems(JSON.parse(items));
         }
@@ -29,58 +47,95 @@ export default function Cart({ navigation }: { navigation: any }) {
     fetchCartItems();
   }, []);
 
-  const increaseQuantity = (item: any) => {
-    setCartItems((prevItems) =>
-      prevItems.map((cartItem) =>
-        cartItem.id === item.id && cartItem.quantity < item.stock
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      )
-    );
+  const updateCart = async (updatedCart: CartItem[]) => {
+    try {
+      setCartItems(updatedCart);
+      await AsyncStorage.setItem("cart", JSON.stringify(updatedCart));
+    } catch (error) {
+      console.error("Error updating cart:", error);
+    }
   };
 
-  const decreaseQuantity = (item: any) => {
-    setCartItems((prevItems) =>
-      prevItems.map((cartItem) =>
-        cartItem.id === item.id && cartItem.quantity > 1
-          ? { ...cartItem, quantity: cartItem.quantity - 1 }
-          : cartItem
-      )
-    );
+  const handleQuantityChange = (item: CartItem, increment: boolean) => {
+    const updatedCart = cartItems.map((cartItem) => {
+      if (cartItem.id === item.id) {
+        let newQuantity = increment
+          ? cartItem.selectedQuantity + 1
+          : cartItem.selectedQuantity - 1;
+
+        // Check if new quantity exceeds available quantity
+        if (newQuantity > cartItem.availableQuantity) {
+          Alert.alert(
+            "Maximum Quantity Reached",
+            `Only ${cartItem.availableQuantity} items available in stock.`
+          );
+          newQuantity = cartItem.availableQuantity;
+        }
+
+        // Ensure quantity doesn't go below 1
+        if (newQuantity < 1) {
+          newQuantity = 1;
+        }
+
+        return {
+          ...cartItem,
+          selectedQuantity: newQuantity,
+        };
+      }
+      return cartItem;
+    });
+    updateCart(updatedCart);
   };
 
-  const renderCartItem = (item: any) => {
-    return (
-      <View key={item.id} style={styles.cartItem}>
-        <Image source={{ uri: item.image1 }} style={styles.itemImage} />
-        <View style={styles.itemDetails}>
-          <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-          <Text style={styles.stockText}>Available: {item.stock}</Text>
-        </View>
-        <View>
-          <TouchableOpacity style={styles.removeButton}>
-            <Text style={styles.removeButtonText}>Remove</Text>
+  const removeItem = (itemId: string) => {
+    const updatedCart = cartItems.filter((cartItem) => cartItem.id !== itemId);
+    updateCart(updatedCart);
+  };
+
+  const renderCartItem = ({ item }: { item: CartItem }) => (
+    <View style={styles.cartItem}>
+      <Image source={{ uri: item.image1 }} style={styles.itemImage} />
+      <View style={styles.itemDetails}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemPrice}>K{item.price.toFixed(2)}</Text>
+        <Text style={styles.stockText}>
+          Available: {item.availableQuantity}
+        </Text>
+      </View>
+      <View>
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => removeItem(item.id)}
+        >
+          <Text style={styles.removeButtonText}>Remove</Text>
+        </TouchableOpacity>
+        <View style={styles.quantityControl}>
+          <TouchableOpacity
+            style={[
+              styles.quantityButton,
+              item.selectedQuantity <= 1 && styles.disabledButton,
+            ]}
+            onPress={() => handleQuantityChange(item, false)}
+            disabled={item.selectedQuantity <= 1}
+          >
+            <Text style={styles.quantityButtonText}>-</Text>
           </TouchableOpacity>
-          <View style={styles.quantityControl}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => decreaseQuantity(item)}
-            >
-              <Text style={styles.quantityButtonText}>-</Text>
-            </TouchableOpacity>
-            <Text style={styles.quantity}>{item.quantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => increaseQuantity(item)}
-            >
-              <Text style={styles.quantityButtonText}>+</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.quantity}>{item.selectedQuantity}</Text>
+          <TouchableOpacity
+            style={[
+              styles.quantityButton,
+              item.selectedQuantity >= item.availableQuantity &&
+                styles.disabledButton,
+            ]}
+            onPress={() => handleQuantityChange(item, true)}
+            disabled={item.selectedQuantity >= item.availableQuantity}
+          >
+            <Text style={styles.quantityButtonText}>+</Text>
+          </TouchableOpacity>
         </View>
       </View>
-    );
-  };
+    </View>
+  );
 
   if (loading) {
     return (
@@ -94,28 +149,31 @@ export default function Cart({ navigation }: { navigation: any }) {
     <View style={styles.container}>
       {cartItems.length === 0 ? (
         <View style={styles.emptyCart}>
-          <Text style={styles.emptyCartText}>
-            Your cart is empty. Add items to your cart.
-          </Text>
+          <Text style={styles.emptyCartText}>Your cart is empty.</Text>
         </View>
       ) : (
         <>
           <FlatList
             data={cartItems}
-            renderItem={({ item }) => renderCartItem(item)}
-            keyExtractor={(item) => item.id.toString()}
-            style={styles.cartList}
+            renderItem={renderCartItem}
+            keyExtractor={(item) => item.id}
           />
           <View style={styles.totalSection}>
-            <Text style={styles.totalText}>Total</Text>
+            <Text style={styles.totalText}>Total:</Text>
             <Text style={styles.totalAmount}>
-              $
+              K
               {cartItems
-                .reduce((total, item) => total + item.price * item.quantity, 0)
+                .reduce(
+                  (total, item) => total + item.price * item.selectedQuantity,
+                  0
+                )
                 .toFixed(2)}
             </Text>
           </View>
-          <TouchableOpacity style={styles.checkoutButton}>
+          <TouchableOpacity
+            style={styles.checkoutButton}
+            onPress={() => navigation.navigate("Checkout")}
+          >
             <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
           </TouchableOpacity>
         </>
@@ -130,22 +188,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#efefef",
     padding: 20,
   },
-  cartList: {
-    flex: 1,
-  },
   cartItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
     backgroundColor: "#fff",
     padding: 10,
     borderRadius: 5,
+    marginBottom: 10,
   },
   itemImage: {
     width: 80,
     height: 80,
-    marginRight: 10,
     borderRadius: 10,
+    marginRight: 10,
   },
   itemDetails: {
     flex: 1,
@@ -153,17 +208,14 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
   },
   itemPrice: {
     fontSize: 16,
     color: "#888",
-    marginBottom: 10,
   },
   stockText: {
     fontSize: 14,
     color: "#555",
-    marginBottom: 10,
   },
   quantityControl: {
     flexDirection: "row",
@@ -174,14 +226,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: 30,
     height: 30,
-    alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
+    alignItems: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#ddd",
+    opacity: 0.5,
   },
   quantityButtonText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#444",
   },
   quantity: {
     fontSize: 18,
@@ -190,14 +244,13 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     backgroundColor: "#ff6666",
+    padding: 5,
     borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    marginBottom: 10,
   },
   removeButtonText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
   },
   emptyCart: {
     flex: 1,
@@ -206,18 +259,15 @@ const styles = StyleSheet.create({
   },
   emptyCartText: {
     fontSize: 18,
-    fontWeight: "bold",
     color: "#888",
   },
   totalSection: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    marginTop: 20,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: "#eee",
-    paddingTop: 20,
-    paddingBottom: 10,
-    marginTop: 20,
   },
   totalText: {
     fontSize: 18,
@@ -231,14 +281,13 @@ const styles = StyleSheet.create({
   checkoutButton: {
     backgroundColor: "#33c37d",
     borderRadius: 5,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    padding: 15,
     alignItems: "center",
     marginTop: 20,
   },
   checkoutButtonText: {
     color: "#fff",
-    fontWeight: "bold",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });

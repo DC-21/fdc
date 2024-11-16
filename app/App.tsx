@@ -23,6 +23,8 @@ import Profile from "./src/screens/Profile";
 import LoginScreen from "./src/screens/auth/Login";
 import RegisterScreen from "./src/screens/auth/Register";
 import AddProducts from "./src/screens/products/AddProducts";
+import CheckoutScreen from "./src/screens/checkout/CheckoutScreen";
+import TransactionVerification from "./src/screens/verification/VerificationScreen";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -88,6 +90,17 @@ export default function App() {
         <Stack.Screen name="Payment" component={Payment} />
         <Stack.Screen name="Contact" component={Contact} />
         <Stack.Screen name="Addproduct" component={AddProducts} />
+        <Stack.Screen
+          name="Checkout"
+          component={CheckoutScreen}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Verification"
+          component={TransactionVerification}
+          options={{ headerShown: false }}
+        />
         {/* <Stack.Screen name="FarmerProfile" component={FarmerProfile} /> */}
       </Stack.Navigator>
       {/* <View style={styles.container}>

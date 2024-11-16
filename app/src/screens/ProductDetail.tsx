@@ -47,6 +47,7 @@ const ProductDetail = ({
         const response = await axios.get(
           `http://192.168.43.241:4000/api/products/${productId}`
         );
+        console.log("this is product data", response);
         setProduct(response.data);
         setTotalAmount(response.data.price);
       } catch (error) {
@@ -84,11 +85,12 @@ const ProductDetail = ({
       );
 
       if (existingProductIndex > -1) {
-        parsedCart[existingProductIndex].quantity += selectedQuantity;
+        parsedCart[existingProductIndex].selectedQuantity += selectedQuantity;
       } else {
         parsedCart.push({
           ...product,
-          quantity: selectedQuantity,
+          selectedQuantity,
+          availableQuantity: product?.quantity,
         });
       }
 
