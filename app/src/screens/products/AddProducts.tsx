@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   Image,
+  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -17,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import categoriesData from "../../data/categoriesData";
 import Nav from "../../components/Nav";
 import { UserData } from "../../types/interface";
+import { ENDPOINT } from "../../api";
 
 interface AddProductsProps {
   navigation: any;
@@ -93,7 +95,7 @@ const AddProducts: React.FC<AddProductsProps> = ({ navigation }) => {
       }
 
       const response = await axios.post(
-        "http://192.168.43.241:4000/api/uploads/upload",
+        `${ENDPOINT}/api/uploads/upload`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -146,7 +148,7 @@ const AddProducts: React.FC<AddProductsProps> = ({ navigation }) => {
         };
 
         const response = await axios.post(
-          "http://192.168.43.241:4000/api/products/new-product",
+          `${ENDPOINT}/api/products/new-product`,
           productData,
           {
             headers: {
@@ -350,7 +352,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   picker: {
-    height: 45,
+    height: Platform.OS === "ios" ? 200 : 45,
+    width: "100%",
   },
   imagePlaceholder: {
     height: 150,

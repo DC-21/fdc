@@ -10,6 +10,7 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import Loader from "../../components/Loader";
 import axios from "axios";
+import { ENDPOINT } from "../../api";
 
 type RegisterScreenProps = {
   navigation: StackNavigationProp<any>;
@@ -68,15 +69,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://192.168.43.241:4000/api/auth/signup",
-        {
-          fullname,
-          email,
-          password,
-          phone,
-        }
-      );
+      const response = await axios.post(`${ENDPOINT}/api/auth/signup`, {
+        fullname,
+        email,
+        password,
+        phone,
+      });
 
       console.log(response.data);
 

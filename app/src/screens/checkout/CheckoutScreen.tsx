@@ -12,19 +12,19 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import NetInfo from "@react-native-community/netinfo";
+import uuid from "react-native-uuid";
+import { ENDPOINT } from "../../api";
 
-// Define your root stack param list
 type RootStackParamList = {
   Checkout: undefined;
-  Success: undefined;
+  Verification: undefined;
 };
 
-// Define the props type using NativeStackScreenProps
 type CheckoutScreenProps = {
   navigation: StackNavigationProp<any>;
 };
 
-// Define the form data type
 type FormDataType = {
   firstname: string;
   lastname: string;
@@ -32,7 +32,6 @@ type FormDataType = {
   phoneNumber: string;
 };
 
-// Define the error type
 type ErrorsType = Partial<Record<keyof FormDataType, string>>;
 
 const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
@@ -47,9 +46,9 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
   const [cart, setCart] = useState<any[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    // Fetch cart and user data from AsyncStorage
     const fetchData = async () => {
       try {
         const cartData = await AsyncStorage.getItem("cart");
@@ -65,7 +64,15 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
       }
     };
 
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(state.isConnected || false);
+    });
+
     fetchData();
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const validateForm = () => {
@@ -92,66 +99,90 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (validateForm()) {
-      if (userData && cart) {
-        // Calculate totalAmount based on selected quantity and price
-        const totalAmount = cart.reduce(
-          (sum, item) => sum + item.price * item.selectedQuantity,
-          0
-        );
+    if (!validateForm()) return;
 
-        // Prepare the data for submission
-        const orderData = {
-          firstname: formData.firstname,
-          lastname: formData.lastname,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          totalAmount: totalAmount,
-          userId: userData.id,
-          cart: cart.map((item) => ({
-            sellerId: item.userId,
-            sellerName: item.fullname,
-            name: item.name,
-            price: item.price,
-            quantity: item.selectedQuantity,
-          })),
-        };
+    if (userData && cart.length > 0) {
+      const totalAmount = cart.reduce(
+        (sum, item) => sum + item.price * item.selectedQuantity,
+        0
+      );
+
+      const orderId = uuid.v4();
+
+      const orderData = {
+        orderId,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        totalAmount,
+        userId: userData.id,
+        cart: cart.map((item) => ({
+          productId: item.id,
+          sellerId: item.userId,
+          sellerName: item.fullname,
+          name: item.name,
+          price: item.price,
+          quantity: item.selectedQuantity,
+        })),
+      };
+
+      try {
+        await AsyncStorage.setItem("orderId", orderId);
+
+        if (!isConnected) {
+          Alert.alert(
+            "Network Issue",
+            "The network is offline. Your request will resume when connectivity is restored."
+          );
+          return;
+        }
 
         setLoading(true);
 
-        try {
-          const response = await axios.post(
-            "http://192.168.43.241:4000/api/orders/new-order",
-            orderData
-          );
+        const response = await axios.post(
+          `${ENDPOINT}/api/orders/new-order`,
+          orderData
+        );
 
-          if (response.status === 201) {
-            Alert.alert("Success", "Order created successfully!", [
-              {
-                text: "OK",
-                onPress: () => {
-                  navigation.navigate("Verification");
-                },
-              },
-            ]);
-          } else {
-            Alert.alert("Error", "Failed to create order");
-          }
-        } catch (error) {
-          console.error("Error submitting order", error);
-          Alert.alert("Error", "An error occurred while submitting the order");
-        } finally {
-          setLoading(false);
+        if (response.status === 201) {
+          await AsyncStorage.removeItem("cart");
+          Alert.alert("Success", "Order created successfully!", [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Verification"),
+            },
+          ]);
+        } else {
+          Alert.alert("Error", "Failed to create order.");
         }
+      } catch (error) {
+        console.error("Error submitting order:", error);
+        Alert.alert("Error", "An error occurred while submitting the order.");
+      } finally {
+        setLoading(false);
       }
     }
   };
+
+  useEffect(() => {
+    const retryOrder = async () => {
+      if (isConnected) {
+        const storedOrderId = await AsyncStorage.getItem("orderId");
+        if (storedOrderId) {
+          handleSubmit();
+          await AsyncStorage.removeItem("orderId");
+        }
+      }
+    };
+
+    retryOrder();
+  }, [isConnected]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Checkout Details</Text>
 
-      {/* First Name */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>First Name</Text>
         <TextInput
@@ -165,7 +196,6 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
         )}
       </View>
 
-      {/* Last Name */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Last Name</Text>
         <TextInput
@@ -179,7 +209,6 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
         )}
       </View>
 
-      {/* Email */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -193,7 +222,6 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
       </View>
 
-      {/* Phone Number */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Phone Number</Text>
         <TextInput
@@ -208,12 +236,11 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
         )}
       </View>
 
-      {/* Submit Button */}
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         {loading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.buttonText}>Pay Now</Text>
         )}
       </TouchableOpacity>
     </ScrollView>

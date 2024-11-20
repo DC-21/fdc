@@ -11,6 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import Loader from "../../components/Loader";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ENDPOINT } from "../../api";
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<any>;
@@ -24,13 +25,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://192.168.43.241:4000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await axios.post(`${ENDPOINT}/api/auth/login`, {
+        email,
+        password,
+      });
 
       console.log(response);
 
